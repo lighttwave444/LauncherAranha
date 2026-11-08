@@ -156,6 +156,14 @@ public class VirtualWindow {
             }
         });
 
+        // fundo escuro opaco por baixo da imagem do app (evita area transparente)
+        View base = new View(ctx);
+        base.setBackgroundColor(0xFF14161D);
+        FrameLayout.LayoutParams blp = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        blp.topMargin = barH;
+        root.addView(base, blp);
+
         // imagem do app (display virtual)
         tv = new TextureView(ctx);
         FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(
@@ -334,13 +342,13 @@ public class VirtualWindow {
             public void run() {
                 try {
                     ensureHelper(ctx);
-                    String out = RootShell.run("am start --display " + displayId + " " + amArgs + " 2>&1");
+                    String out = RootShell.run("am start --display " + displayId + " --windowingMode 1 " + amArgs + " 2>&1");
                     log("am start: " + out);
                     if (out != null && (out.contains("Error") || out.contains("Exception"))) {
                         fail("am start recusou");
                         return;
                     }
-                    Thread.sleep(3500);
+                    Thread.sleep(6000);
                     log("frames=" + frames);
                     if (frames < 3) fail("sem imagem no display virtual");
                 } catch (Throwable t) {
