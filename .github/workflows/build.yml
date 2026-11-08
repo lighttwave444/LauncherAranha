@@ -1,0 +1,45 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Instalar dependencias
+        run: npm install
+      - name: Criar projeto Android
+        run: |
+          npx cap add android
+          npx cap sync android
+      - name: Icone, tela cheia e launcher
+        run: |
+          R=android/app/src/main/res
+          rm -rf $R/mipmap-anydpi-v26
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            n=${d%%:*}; s=${d##*:}
+            for f in ic_launcher ic_launcher_round ic_launcher_foreground; do
+              convert icon.png -resize ${s}x${s} $R/mipmap-$n/$f.png
+            done
+          done
+          # tela cheia
+          sed -i 's|</style>|<item name="android:windowFullscreen">true</item><item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item></style>|g' $R/values/styles.xml
+          # tambem aparece como opcao de tela inicial (HOME)
+          sed -i 's|<category android:name="android.intent.category.LAUNCHER" />|<category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" />|' android/app/src/main/AndroidManifest.xml
+      - name: Compilar APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - name: Renomear
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk LauncherAranha.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Launcher Aranha 1.0.${{ github.run_number }}
+          files: LauncherAranha.apk
