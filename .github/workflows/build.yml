@@ -39,9 +39,11 @@ jobs:
           sed -i 's|<category android:name="android.intent.category.LAUNCHER" />|<category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" />|' $M
           # permite enxergar/abrir os outros apps instalados
           sed -i 's|</manifest>|<queries><intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent><intent><action android:name="android.intent.action.DIAL" /></intent></queries></manifest>|' $M
+          # permissao para desenhar a moldura das janelas por cima dos apps
+          sed -i 's|</manifest>|<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /></manifest>|' $M
           # plugin que abre apps
           J=android/app/src/main/java/com/launchertop/aranha
-          cp native/AppLauncherPlugin.java native/MainActivity.java $J/
+          cp native/*.java $J/
           # chave fixa para poder atualizar o app por cima
           mkdir -p ~/.android && cp debug.keystore ~/.android/debug.keystore
       - name: Compilar APK

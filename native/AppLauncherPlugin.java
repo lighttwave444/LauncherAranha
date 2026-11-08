@@ -14,8 +14,7 @@ public class AppLauncherPlugin extends Plugin {
 
     private boolean runRoot(String cmd) {
         try {
-            Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
-            return p.waitFor() == 0;
+            return RootShell.ok(cmd);
         } catch (Exception e) {
             return false;
         }
@@ -42,6 +41,9 @@ public class AppLauncherPlugin extends Plugin {
                     }
                 }
                 if (cmd != null && runRoot(cmd)) {
+                    if (pkg != null && !pkg.isEmpty() && !WindowFrames.has(pkg)) {
+                        WindowFrames.attach(getContext().getApplicationContext(), pkg);
+                    }
                     res.put("ok", true);
                     res.put("win", true);
                     call.resolve(res);
