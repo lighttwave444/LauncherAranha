@@ -12,6 +12,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "AppLauncher")
 public class AppLauncherPlugin extends Plugin {
 
+    // true  = abre os apps na janela propria do launcher (display virtual)
+    // false = volta para a janela freeform do sistema (metodo antigo)
+    private static final boolean USE_VIRTUAL = true;
+
     private boolean runRoot(String cmd) {
         try {
             return RootShell.ok(cmd);
@@ -20,30 +24,66 @@ public class AppLauncherPlugin extends Plugin {
         }
     }
 
+    /** Metodo antigo: janela freeform do sistema com a moldura por cima. */
+    private boolean openFreeform(String pkg, String action) {
+        PackageManager pm = getContext().getPackageManager();
+        String cmd = null;
+        if ("dial".equals(action)) {
+            cmd = "am start --windowingMode 5 -a android.intent.action.DIAL";
+        } else if (!"settings".equals(action)) {
+            Intent li = pm.getLaunchIntentForPackage(pkg);
+            if (li != null && li.getComponent() != null) {
+                cmd = "am start --windowingMode 5 -n '" + li.getComponent().flattenToShortString() + "'";
+            }
+        }
+        if (cmd != null && runRoot(cmd)) {
+            if (pkg != null && !pkg.isEmpty() && !WindowFrames.has(pkg)) {
+                WindowFrames.attach(getContext().getApplicationContext(), pkg);
+            }
+            return true;
+        }
+        return false;
+    }
+
     @PluginMethod
     public void open(PluginCall call) {
         JSObject res = new JSObject();
         try {
-            String pkg = call.getString("pkg", "");
-            String action = call.getString("action", "");
+            final String pkg = call.getString("pkg", "");
+            final String action = call.getString("action", "");
             boolean win = Boolean.TRUE.equals(call.getBoolean("win", false));
             PackageManager pm = getContext().getPackageManager();
 
-            // 1) em janela flutuante (freeform) via root
             if (win) {
-                String cmd = null;
-                if ("dial".equals(action)) {
-                    cmd = "am start --windowingMode 5 -a android.intent.action.DIAL";
-                } else if (!"settings".equals(action)) {
-                    Intent li = pm.getLaunchIntentForPackage(pkg);
-                    if (li != null && li.getComponent() != null) {
-                        cmd = "am start --windowingMode 5 -n '" + li.getComponent().flattenToShortString() + "'";
+                // 1) janela propria (display virtual)
+                if (USE_VIRTUAL) {
+                    String args = null;
+                    if ("dial".equals(action)) {
+                        args = "-a android.intent.action.DIAL";
+                    } else if (!"settings".equals(action)) {
+                        Intent li = pm.getLaunchIntentForPackage(pkg);
+                        if (li != null && li.getComponent() != null) {
+                            args = "-n '" + li.getComponent().flattenToShortString() + "'";
+                        }
+                    }
+                    if (args != null) {
+                        String key = (pkg == null || pkg.isEmpty()) ? action : pkg;
+                        boolean started = VirtualWindow.has(key)
+                                || VirtualWindow.open(getContext().getApplicationContext(), key, pkg, args,
+                                new Runnable() {
+                                    public void run() { openFreeform(pkg, action); }
+                                });
+                        if (started) {
+                            res.put("ok", true);
+                            res.put("win", true);
+                            call.resolve(res);
+                            return;
+                        }
                     }
                 }
-                if (cmd != null && runRoot(cmd)) {
-                    if (pkg != null && !pkg.isEmpty() && !WindowFrames.has(pkg)) {
-                        WindowFrames.attach(getContext().getApplicationContext(), pkg);
-                    }
+
+                // 2) janela flutuante (freeform) via root
+                if (openFreeform(pkg, action)) {
                     res.put("ok", true);
                     res.put("win", true);
                     call.resolve(res);
@@ -51,7 +91,7 @@ public class AppLauncherPlugin extends Plugin {
                 }
             }
 
-            // 2) abertura normal (tela cheia)
+            // 3) abertura normal (tela cheia)
             Intent i;
             if ("dial".equals(action)) {
                 i = new Intent(Intent.ACTION_DIAL);
