@@ -15,15 +15,18 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
       - name: Instalar dependencias
-        run: npm install
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y imagemagick
+          npm install
       - name: Criar projeto Android
         run: |
           npx cap add android
           npx cap sync android
-      - name: Icone, tela cheia e launcher
+      - name: Icone, tela cheia, launcher e plugin
         run: |
-          sudo apt-get update -y && sudo apt-get install -y imagemagick
           R=android/app/src/main/res
+          M=android/app/src/main/AndroidManifest.xml
           rm -rf $R/mipmap-anydpi-v26
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             n=${d%%:*}; s=${d##*:}
@@ -31,10 +34,16 @@ jobs:
               convert icon.png -resize ${s}x${s} $R/mipmap-$n/$f.png
             done
           done
-          # tela cheia
           sed -i 's|</style>|<item name="android:windowFullscreen">true</item><item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item></style>|g' $R/values/styles.xml
-          # tambem aparece como opcao de tela inicial (HOME)
-          sed -i 's|<category android:name="android.intent.category.LAUNCHER" />|<category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" />|' android/app/src/main/AndroidManifest.xml
+          # tela inicial (HOME)
+          sed -i 's|<category android:name="android.intent.category.LAUNCHER" />|<category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" />|' $M
+          # permite enxergar/abrir os outros apps instalados
+          sed -i 's|</manifest>|<queries><intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent><intent><action android:name="android.intent.action.DIAL" /></intent></queries></manifest>|' $M
+          # plugin que abre apps
+          J=android/app/src/main/java/com/launchertop/aranha
+          cp native/AppLauncherPlugin.java native/MainActivity.java $J/
+          # chave fixa para poder atualizar o app por cima
+          mkdir -p ~/.android && cp debug.keystore ~/.android/debug.keystore
       - name: Compilar APK
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug
       - name: Renomear
