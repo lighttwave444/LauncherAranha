@@ -650,7 +650,7 @@ function openApp0(k){
 /* ===== abre os apps de verdade do celular (plugin AppLauncher); se nao der, abre a janela de antes ===== */
 const NAT={msg:['com.whatsapp'],cal:['com.google.android.calendar'],tel:['@dial'],cam:['com.zhiliaoapp.musically','com.ss.android.ugc.trill'],mus:['com.google.android.apps.youtube.music'],pho:['com.google.android.apps.photos'],mail:['com.google.android.gm'],map:['com.google.android.apps.maps'],chr:['com.android.chrome'],yt:['com.google.android.youtube'],tg:['org.telegram.messenger'],spo:['com.spotify.music']};
 async function nativeOpen(k){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AppLauncher;if(!P||!NAT[k])return false;for(const p of NAT[k]){try{const r=p==='@dial'?await P.open({action:'dial',win:true}):await P.open({pkg:p,win:true});if(r&&r.ok)return true}catch(e){}}return false}
-function openApp(k){nativeOpen(k).then(ok=>{if(!ok)openApp0(k)})}
+let _oa=0;function openApp(k){const n=Date.now();if(n-_oa<700)return;_oa=n;nativeOpen(k).then(ok=>{if(!ok)openApp0(k)})}
 function drag(h,w,rs){
  h.addEventListener('pointerdown',e=>{
   if(e.target.closest('button,a'))return;
