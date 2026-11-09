@@ -323,6 +323,23 @@ public class VirtualWindow {
     }
 
     private void startDisplay() {
+        surface = new Surface(st);
+        RootDisplay.create(ctx, "aranha-" + key, dispW, dispH, dpi, surface, new RootDisplay.Callback() {
+            public void done(int id, String err) {
+                if (id >= 0) {
+                    displayId = id;
+                    log("display root confiavel " + id + " " + dispW + "x" + dispH + " dpi " + dpi + " (" + err + ")");
+                    launch();
+                } else {
+                    log("display root falhou, usando o local: " + err);
+                    try { surface.release(); } catch (Exception e) { }
+                    startDisplayLocal();
+                }
+            }
+        });
+    }
+
+    private void startDisplayLocal() {
         DisplayManager dmg = (DisplayManager) ctx.getSystemService(Context.DISPLAY_SERVICE);
         surface = new Surface(st);
         int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
@@ -349,7 +366,7 @@ public class VirtualWindow {
                         return;
                     }
                     if (pkg != null && pkg.length() > 0) {
-//                        RootShell.send("( for i in 1 2 3 4 5 6; do sleep 1; T=$(dumpsys activity activities | grep -o 'Task{[0-9a-f]* #[0-9]* type=standard A=[0-9]*:" + pkg + "' | head -1 | sed 's/.*#\\([0-9]*\\) .*/\\1/'); [ -n \"$T\" ] && am display move-stack $T " + displayId + "; done ) >/dev/null 2>&1 &");
+                        RootShell.send("( for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do sleep 0.2; T=$(dumpsys activity activities | grep -o 'Task{[0-9a-f]* #[0-9]* type=standard A=[0-9]*:" + pkg + "' | head -1 | sed 's/.*#\\([0-9]*\\) .*/\\1/'); [ -n \"$T\" ] && am display move-stack $T " + displayId + "; done ) >/dev/null 2>&1 &");
                     }
                     Thread.sleep(6000);
                     log("frames=" + frames);

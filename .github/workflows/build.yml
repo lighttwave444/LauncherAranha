@@ -44,6 +44,9 @@ jobs:
           # plugin que abre apps
           J=android/app/src/main/java/com/launchertop/aranha
           cp native/*.java $J/
+          sed -i "s|mavenCentral()|mavenCentral()\n        maven { url 'https://jitpack.io' }|" android/build.gradle
+          sed -i '0,/^dependencies {/s/^dependencies {/dependencies {\n    implementation "com.github.topjohnwu.libsu:service:6.0.0"/' android/app/build.gradle
+          sed -i 's|</application>|<service android:name="com.launchertop.aranha.DisplayRootService" android:exported="false" /></application>|' $M
           # chave fixa para poder atualizar o app por cima
           mkdir -p ~/.android && cp debug.keystore ~/.android/debug.keystore
       - name: Compilar APK
