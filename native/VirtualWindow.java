@@ -502,7 +502,7 @@ public class VirtualWindow {
                 int r = l + v.wlp.width, b = t + v.wlp.height;
                 int g = v.dp(44);
                 boolean inGrip = x >= r - g && x <= r && y >= b - g && y <= b;
-                boolean inBar = x >= l && x <= r && y >= t && y <= t + v.barH;
+                boolean inBar = x >= l && x <= r - v.dp(36) && y >= t && y <= t + v.barH;
                 int aw = v.dp(22), ah = v.dp(60);
                 int ay = t + v.wlp.height / 2 - ah / 2;
                 boolean inArrow = x >= l && x <= l + aw && y >= ay && y <= ay + ah;
@@ -550,5 +550,63 @@ public class VirtualWindow {
         if (v != null && rs) {
             MAIN.post(new Runnable() { public void run() { v.applySize(); } });
         }
+    }
+
+    // ===== clique da seta dentro da janela e no X =====
+    private static VirtualWindow ptrWin;
+    private static long ptrDown;
+
+    private static VirtualWindow windowAt(int x, int y) {
+        VirtualWindow best = null;
+        synchronized (WINDOWS) {
+            for (VirtualWindow v : WINDOWS.values()) {
+                if (v.wlp == null || v.displayId < 0) continue;
+                int l = v.wlp.x, t = v.wlp.y + v.barH;
+                if (x >= l && x <= l + v.wlp.width && y >= t && y <= v.wlp.y + v.wlp.height
+                        && (best == null || v.pgZ > best.pgZ)) best = v;
+            }
+        }
+        return best;
+    }
+
+    private static boolean closeAt(int x, int y) {
+        VirtualWindow best = null;
+        synchronized (WINDOWS) {
+            for (VirtualWindow v : WINDOWS.values()) {
+                if (v.wlp == null) continue;
+                int r = v.wlp.x + v.wlp.width;
+                int cy = v.wlp.y + v.barH / 2;
+                int h = v.dp(16);
+                if (x >= r - v.dp(38) && x <= r - v.dp(6) && y >= cy - h && y <= cy + h
+                        && (best == null || v.pgZ > best.pgZ)) best = v;
+            }
+        }
+        if (best == null) return false;
+        final VirtualWindow w = best;
+        MAIN.post(new Runnable() { public void run() { w.close(true); } });
+        return true;
+    }
+
+    /** a: 0 = apertou, 2 = moveu apertado, 1 = soltou */
+    public static boolean ptrEvent(int a, int x, int y) {
+        VirtualWindow v;
+        if (a == 0) {
+            if (closeAt(x, y)) return true;
+            v = windowAt(x, y);
+            if (v == null) return false;
+            ptrWin = v;
+            ptrDown = android.os.SystemClock.uptimeMillis();
+        } else {
+            v = ptrWin;
+            if (v == null) return false;
+        }
+        float sx = (float) v.dispW / Math.max(1, v.wlp.width);
+        float sy = (float) v.dispH / Math.max(1, v.wlp.height - v.barH);
+        float px = Math.max(0, Math.min(v.dispW - 1, (x - v.wlp.x) * sx));
+        float py = Math.max(0, Math.min(v.dispH - 1, (y - v.wlp.y - v.barH) * sy));
+        send("E " + a + " " + v.displayId + " " + ptrDown + " "
+                + android.os.SystemClock.uptimeMillis() + " 1 0 " + px + " " + py);
+        if (a == 1) ptrWin = null;
+        return true;
     }
 }

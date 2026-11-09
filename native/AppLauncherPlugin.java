@@ -144,4 +144,13 @@ public class AppLauncherPlugin extends Plugin {
         VirtualWindow.drop();
         call.resolve();
     }
+
+    @PluginMethod
+    public void ptrEvent(PluginCall call) {
+        boolean ok = VirtualWindow.ptrEvent(call.getInt("a", 0),
+                call.getInt("x", 0), call.getInt("y", 0));
+        JSObject r = new JSObject();
+        r.put("ok", ok);
+        call.resolve(r);
+    }
 }

@@ -7,6 +7,7 @@
   document.head.appendChild(st);
   var d = window.devicePixelRatio || 1, last = '', lastDrag = '';
   var held = false, grabbing = false;
+  var clicking = false, lastClk = '';
 
   function tip(){
     try{
@@ -23,11 +24,23 @@
         if(held){ grabbing = true; lastDrag = ''; }
         else { A.drop().catch(function(){}); }
       }
+      else {
+        A.ptrEvent({a:0, x:t.x, y:t.y}).then(function(r2){
+          if(!(r2 && r2.ok)) return;
+          if(held){ clicking = true; lastClk = t.x + ',' + t.y; }
+          else { A.ptrEvent({a:1, x:t.x, y:t.y}).catch(function(){}); }
+        }).catch(function(){});
+      }
     }).catch(function(){});
   };
   window.__pgDrop = function(){
     held = false; grabbing = false;
     A.drop().catch(function(){});
+    if(clicking){
+      clicking = false;
+      var t2 = tip();
+      if(t2) A.ptrEvent({a:1, x:t2.x, y:t2.y}).catch(function(){});
+    }
   };
 
   function tick(){
@@ -46,6 +59,13 @@
       if(t){
         var kk = t.x + ',' + t.y;
         if(kk !== lastDrag){ lastDrag = kk; A.dragTo(t).catch(function(){}); }
+      }
+    }
+    if(clicking){
+      var c = tip();
+      if(c){
+        var ck = c.x + ',' + c.y;
+        if(ck !== lastClk){ lastClk = ck; A.ptrEvent({a:2, x:c.x, y:c.y}).catch(function(){}); }
       }
     }
     requestAnimationFrame(tick);
