@@ -91,6 +91,7 @@ public class AppLauncherPlugin extends Plugin {
                 }
             }
 
+            if (win) { res.put("ok", false); call.resolve(res); return; }
             // 3) abertura normal (tela cheia)
             Intent i;
             if ("dial".equals(action)) {
