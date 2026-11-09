@@ -355,10 +355,10 @@ function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u
  else if(st.ext){const mb=menuHit(u.tx,u.ty,14);if(st.mv>=12){if(!mb){hideMenu();showMenu()}}else if(Date.now()-st.t<350&&e.type==='pointerup'){if(mb)mb.click();else{const A=sel;if(A){let b;if(A.ta)b={ta:A.ta,i:idxAt(A.ta,u.tx,u.ty)};else b=txtAt(u);if(b)selTo(A,b)}lastTap=Date.now();hideMenu();showMenu()}}}
  else if(st.txt){pressPtr(1);hideMenu();const T=st.tw,col=T.ta?T.ta.selectionStart===T.ta.selectionEnd:getSelection().isCollapsed;if(col)showPaste(u);else showMenu()}
  else if(st.drag){window.__pgDrop&&window.__pgDrop();fire('pointerup',phone,u.tx+st.off[0],u.ty+st.off[1]);pressPtr(1);hideMenu();if(st.mv<12)showPaste(u)}
- else if(st.mv<12&&Date.now()-st.t<350&&e.type==='pointerup'){fire('pointerdown',u.el,u.x,u.y);fire('pointerup',u.el,u.x,u.y);
+ else if(st.mv<12&&Date.now()-st.t<350&&e.type==='pointerup'){const kb=st.kb,webTap=()=>{fire('pointerdown',u.el,u.x,u.y);fire('pointerup',u.el,u.x,u.y);
   if(u.el){u.el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:u.x,clientY:u.y}));
    const ta=u.el.closest&&u.el.closest('textarea');if(ta){focusQuiet(ta);const i=idxAt(ta,u.tx,u.ty);ta.setSelectionRange(i,i)}}
-  pressPtr(.75);setTimeout(()=>pressPtr(1),140);lastTap=st.kb?0:Date.now();hideMenu()}
+  };pressPtr(.75);setTimeout(()=>pressPtr(1),140);lastTap=kb?0:Date.now();hideMenu();if(window.__pgTap)window.__pgTap(webTap);else webTap()}
  st=null}
 phone.addEventListener('pointerup',endPad);phone.addEventListener('pointercancel',endPad);
 

@@ -43,6 +43,16 @@
     }
   };
 
+  window.__pgTap = function(fallback){
+    var t = tip();
+    if(!t){ fallback(); return; }
+    A.ptrEvent({a:0, x:t.x, y:t.y}).then(function(res){
+      if(res && res.ok){
+        setTimeout(function(){ A.ptrEvent({a:1, x:t.x, y:t.y}).catch(function(){}); }, 40);
+      } else { fallback(); }
+    }).catch(function(){ fallback(); });
+  };
+
   function tick(){
     var r = p.getBoundingClientRect();
     var o = {x:Math.round(r.left*d), y:Math.round(r.top*d),
