@@ -115,4 +115,13 @@ public class AppLauncherPlugin extends Plugin {
             call.resolve(res);
         }
     }
+
+    @PluginMethod
+    public void ptr(PluginCall call) {
+        PointerOverlay.set(getContext().getApplicationContext(),
+            call.getInt("x", 0), call.getInt("y", 0),
+            call.getInt("w", 0), call.getInt("h", 0),
+            call.getBoolean("v", true));
+        call.resolve();
+    }
 }

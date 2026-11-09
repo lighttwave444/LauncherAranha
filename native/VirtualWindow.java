@@ -314,7 +314,7 @@ public class VirtualWindow {
         wlp.x = (int) (dm.widthPixels * 0.06) + off;
         wlp.y = (int) (dm.heightPixels * 0.13) + off * 2;
         wm.addView(root, wlp);
-        ArrowOverlay.front();
+        PointerOverlay.front();
         synchronized (WINDOWS) { WINDOWS.put(key, this); }
     }
 

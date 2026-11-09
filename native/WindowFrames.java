@@ -331,7 +331,7 @@ public class WindowFrames {
         f.wm.addView(f.sb, f.sbLp);
         f.wm.addView(f.bar, f.barLp);
         f.wm.addView(f.grip, f.gripLp);
-        ArrowOverlay.front();
+        PointerOverlay.front();
         synchronized (FRAMES) { FRAMES.put(pkg, f); }
         startWatch();
     }
