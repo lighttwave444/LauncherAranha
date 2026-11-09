@@ -124,4 +124,24 @@ public class AppLauncherPlugin extends Plugin {
             call.getBoolean("v", true));
         call.resolve();
     }
+
+    @PluginMethod
+    public void grab(PluginCall call) {
+        boolean ok = VirtualWindow.grabAt(call.getInt("x", 0), call.getInt("y", 0));
+        JSObject r = new JSObject();
+        r.put("ok", ok);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void dragTo(PluginCall call) {
+        VirtualWindow.dragTo(call.getInt("x", 0), call.getInt("y", 0));
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void drop(PluginCall call) {
+        VirtualWindow.drop();
+        call.resolve();
+    }
 }

@@ -482,4 +482,48 @@ public class VirtualWindow {
             }
         }
     }
+
+    // ===== ponteiro agarra a janela (barra ou setinha) =====
+    private static long PG_SEQ = 0;
+    private final long pgZ = ++PG_SEQ;
+    private static VirtualWindow pgWin;
+    private static int pgDx, pgDy;
+    private static volatile int pgX, pgY;
+    private static volatile boolean pgPending = false;
+
+    public static boolean grabAt(int x, int y) {
+        VirtualWindow best = null;
+        synchronized (WINDOWS) {
+            for (VirtualWindow v : WINDOWS.values()) {
+                if (v.wlp == null) continue;
+                int l = v.wlp.x, t = v.wlp.y, r = l + v.wlp.width;
+                boolean inBar = x >= l && x <= r && y >= t && y <= t + v.barH;
+                int aw = v.dp(22), ah = v.dp(60);
+                int ay = t + v.wlp.height / 2 - ah / 2;
+                boolean inArrow = x >= l && x <= l + aw && y >= ay && y <= ay + ah;
+                if ((inBar || inArrow) && (best == null || v.pgZ > best.pgZ)) best = v;
+            }
+        }
+        if (best == null) return false;
+        pgWin = best;
+        pgDx = x - best.wlp.x;
+        pgDy = y - best.wlp.y;
+        return true;
+    }
+
+    public static void dragTo(int x, int y) {
+        pgX = x; pgY = y;
+        if (pgWin == null || pgPending) return;
+        pgPending = true;
+        MAIN.post(new Runnable() { public void run() {
+            pgPending = false;
+            VirtualWindow v = pgWin;
+            if (v == null) return;
+            v.wlp.x = pgX - pgDx;
+            v.wlp.y = Math.max(0, pgY - pgDy);
+            v.update();
+        }});
+    }
+
+    public static void drop() { pgWin = null; }
 }

@@ -336,7 +336,7 @@ phone.addEventListener('pointerdown',e=>{
  else if(st.dbl){st.a=txtAt(under(true));sel=st.a;if(st.a&&st.a.ta){focusQuiet(st.a.ta);st.a.ta.setSelectionRange(st.a.i,st.a.i)}}
  else if(!st.ext)st.h=setTimeout(()=>{if(st&&!st.drag&&!st.txt&&st.mv<12){const u=under(true),a=textHit(u)?txtAt(u):null;
   if(a){st.txt=true;sel=null;let w=pickWord(a);if(!w){if(a.ta){focusQuiet(a.ta);a.ta.setSelectionRange(a.i,a.i);w={ta:a.ta,s:a.i,f:a.i}}else w={node:a.node,s:a.off,f:a.off}}st.tw=w;hideMenu();pressPtr(.8);buzz()}
-  else{st.drag=true;st.off=[u.x-u.tx,u.y-u.ty];fire('pointerdown',u.el,u.x,u.y);pressPtr(.8);buzz()}}},320)});
+  else{st.drag=true;st.off=[u.x-u.tx,u.y-u.ty];window.__pgGrab&&window.__pgGrab();fire('pointerdown',u.el,u.x,u.y);pressPtr(.8);buzz()}}},320)});
 phone.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
  if(st.top&&e.clientY-st.sy>32&&Math.abs(e.clientX-st.sx)<60){clearTimeout(st.h);st=null;toggleCC(true);return}
  const dx=e.clientX-st.x,dy=e.clientY-st.y;st.x=e.clientX;st.y=e.clientY;
@@ -354,7 +354,7 @@ function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u
   if(st.mv<12&&st.a)pickWord(st.a);lastTap=0;hideMenu();if(!st.stop)showMenu()}
  else if(st.ext){const mb=menuHit(u.tx,u.ty,14);if(st.mv>=12){if(!mb){hideMenu();showMenu()}}else if(Date.now()-st.t<350&&e.type==='pointerup'){if(mb)mb.click();else{const A=sel;if(A){let b;if(A.ta)b={ta:A.ta,i:idxAt(A.ta,u.tx,u.ty)};else b=txtAt(u);if(b)selTo(A,b)}lastTap=Date.now();hideMenu();showMenu()}}}
  else if(st.txt){pressPtr(1);hideMenu();const T=st.tw,col=T.ta?T.ta.selectionStart===T.ta.selectionEnd:getSelection().isCollapsed;if(col)showPaste(u);else showMenu()}
- else if(st.drag){fire('pointerup',phone,u.tx+st.off[0],u.ty+st.off[1]);pressPtr(1);hideMenu();if(st.mv<12)showPaste(u)}
+ else if(st.drag){window.__pgDrop&&window.__pgDrop();fire('pointerup',phone,u.tx+st.off[0],u.ty+st.off[1]);pressPtr(1);hideMenu();if(st.mv<12)showPaste(u)}
  else if(st.mv<12&&Date.now()-st.t<350&&e.type==='pointerup'){fire('pointerdown',u.el,u.x,u.y);fire('pointerup',u.el,u.x,u.y);
   if(u.el){u.el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:u.x,clientY:u.y}));
    const ta=u.el.closest&&u.el.closest('textarea');if(ta){focusQuiet(ta);const i=idxAt(ta,u.tx,u.ty);ta.setSelectionRange(i,i)}}
