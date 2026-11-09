@@ -223,7 +223,7 @@ requestAnimationFrame(()=>{const t=dock.children[3].getBoundingClientRect(),r=ph
 const HIT='.ic,button,a,textarea,.bar,.rz,.k,.cct,.sld,.drh';
 function elAt(x,y){return document.elementsFromPoint(x,y).find(e=>!e.closest('.ptr'))}
 function icFix(el,x,y){if(el&&el.closest(HIT))return el;for(const c of document.querySelectorAll(".ic")){const b=c.getBoundingClientRect();if(b.width&&x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom&&(!el||el.contains(c)))return c}return el}
-function under(tol){const r=phone.getBoundingClientRect(),tx=r.left+px,ty=r.top+py;let el=icFix(elAt(tx,ty),tx,ty),x=tx,y=ty;
+function under(tol){const r=phone.getBoundingClientRect(),P=ptr.getBoundingClientRect(),tx=P.width?P.left+P.width*.08:r.left+px,ty=P.width?P.top+P.height*.07:r.top+py;let el=icFix(elAt(tx,ty),tx,ty),x=tx,y=ty;
  if(tol&&!(el&&el.closest(HIT))){const u=r.width*.006;
   find:for(const k of [.5,1])for(const a of [45,0,90,315,135,270,180,225]){const qx=tx+Math.cos(a*Math.PI/180)*u*k,qy=ty+Math.sin(a*Math.PI/180)*u*k,e=elAt(qx,qy);if(e&&e.closest(HIT)){el=e;break find}}}
  return{x,y,tx,ty,el}}
