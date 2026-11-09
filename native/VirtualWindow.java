@@ -242,7 +242,7 @@ public class VirtualWindow {
                 FrameLayout.LayoutParams.MATCH_PARENT, barH, Gravity.TOP));
 
         // arrastar pela barra: so mexe na moldura
-        bar.setOnTouchListener(new View.OnTouchListener() {
+        final View.OnTouchListener dragL = new View.OnTouchListener() {
             float sx, sy;
             int x0, y0;
             public boolean onTouch(View v, MotionEvent e) {
@@ -259,7 +259,22 @@ public class VirtualWindow {
                 }
                 return false;
             }
-        });
+        };
+        bar.setOnTouchListener(dragL);
+        // seta: arrastar por ela move a janela (mesmo listener da barra)
+        TextView seta = new TextView(ctx);
+        seta.setText("\u2039");
+        seta.setTextColor(Color.WHITE);
+        seta.setTextSize(22);
+        seta.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        seta.setGravity(Gravity.CENTER);
+        GradientDrawable setaBg = new GradientDrawable();
+        setaBg.setColor(0xCC5A6472);
+        setaBg.setCornerRadii(new float[]{0, 0, dp(10), dp(10), dp(10), dp(10), 0, 0});
+        seta.setBackground(setaBg);
+        seta.setOnTouchListener(dragL);
+        root.addView(seta, new FrameLayout.LayoutParams(dp(22), dp(60),
+                Gravity.LEFT | Gravity.CENTER_VERTICAL));
 
         // canto de redimensionar
         GripView grip = new GripView(ctx);
