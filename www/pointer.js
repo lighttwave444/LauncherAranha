@@ -1,4 +1,5 @@
 (function(){
+  function DPR(){return window.devicePixelRatio||1;}
   var A = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.AppLauncher;
   var p = document.getElementById('ptr');
   if(!A || !p) return;
@@ -13,7 +14,7 @@
     try{
       if(typeof px !== 'number' || typeof phone === 'undefined') return null;
       var r = phone.getBoundingClientRect();
-      return {x:Math.round((r.left+px)*d), y:Math.round((r.top+py)*d)};
+      return {x:Math.round((r.left+px)*DPR()), y:Math.round((r.top+py)*DPR())};
     }catch(e){ return null; }
   }
   window.__pgGrab = function(){
@@ -55,8 +56,8 @@
 
   function tick(){
     var r = p.getBoundingClientRect();
-    var o = {x:Math.round(r.left*d), y:Math.round(r.top*d),
-             w:Math.round(r.width*d), h:Math.round(r.height*d),
+    var o = {x:Math.round(r.left*DPR()), y:Math.round(r.top*DPR()),
+             w:Math.round(r.width*DPR()), h:Math.round(r.height*DPR()),
              v:!document.hidden && r.width > 0};
     var k = [o.x,o.y,o.w,o.h,o.v].join();
     if(k !== last){

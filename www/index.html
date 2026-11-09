@@ -215,7 +215,7 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const u=()=>{const p=M
 let GAIN=3;const VID=99;let px=0,py=0,st=null;
 function setPtr(x,y){const r=phone.getBoundingClientRect();px=Math.max(0,Math.min(x,r.width));py=Math.max(0,Math.min(y,r.height));drawPtr()}
 let ps=1;
-function drawPtr(){const k=parseFloat(getComputedStyle(ptr).width)/12||2;ptr.style.transform='translate('+(px-k)+'px,'+(py-k)+'px) scale('+ps+')'}
+function drawPtr(){const k=parseFloat(getComputedStyle(ptr).width)/12||2;const r=phone.getBoundingClientRect(),o=(ptr.offsetParent||document.body).getBoundingClientRect();ptr.style.transform='translate('+(px-k+r.left-o.left)+'px,'+(py-k+r.top-o.top)+'px) scale('+ps+')'}
 function pressPtr(s){ps=s;drawPtr()}
 ['pointermove','pointerdown'].forEach(t=>phone.addEventListener(t,e=>{if(e.isTrusted&&e.pointerType==='mouse'){const r=phone.getBoundingClientRect();setPtr(e.clientX-r.left,e.clientY-r.top)}}));
 requestAnimationFrame(()=>{const t=dock.children[3].getBoundingClientRect(),r=phone.getBoundingClientRect();setPtr(t.left-r.left+t.width*.42,t.top-r.top+t.height*.72)});
