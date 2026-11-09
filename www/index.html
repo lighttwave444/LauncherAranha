@@ -227,6 +227,12 @@ function under(tol){const r=phone.getBoundingClientRect(),P=ptr.getBoundingClien
  if(tol&&!(el&&el.closest(HIT))){const u=r.width*.006;
   find:for(const k of [.5,1])for(const a of [45,0,90,315,135,270,180,225]){const qx=tx+Math.cos(a*Math.PI/180)*u*k,qy=ty+Math.sin(a*Math.PI/180)*u*k,e=elAt(qx,qy);if(e&&e.closest(HIT)){el=e;break find}}}
  return{x,y,tx,ty,el}}
+function dbg(u){try{const P=ptr.getBoundingClientRect(),r=phone.getBoundingClientRect();
+const dot=(x,y,c)=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:'+(x-6)+'px;top:'+(y-6)+'px;width:12px;height:12px;border-radius:50%;background:'+c+';z-index:2147483647;pointer-events:none';document.body.appendChild(d);setTimeout(()=>d.remove(),2500)};
+dot(u.x,u.y,'red');dot(P.left+P.width*.08,P.top+P.height*.07,'lime');
+let t=document.getElementById('__dbg');if(!t){t=document.createElement('div');t.id='__dbg';t.style.cssText='position:fixed;left:0;top:60px;z-index:2147483647;pointer-events:none;font:12px monospace;color:#0f0;background:rgba(0,0,0,.8);padding:3px 5px;white-space:pre';document.body.appendChild(t)}
+t.textContent='click '+(u.x|0)+','+(u.y|0)+' px,py '+(px|0)+','+(py|0)+'\nphone '+(r.left|0)+','+(r.top|0)+' '+(r.width|0)+'x'+(r.height|0)+'\nptr '+(P.left|0)+','+(P.top|0)+' '+(P.width|0)+'x'+(P.height|0)+'\nel '+(u.el?u.el.tagName+'.'+u.el.className:'null')+'\nstack '+document.elementsFromPoint(u.x,u.y).slice(0,4).map(e=>e.tagName+'.'+String(e.className).slice(0,12)).join(' > ');
+clearTimeout(window.__dt);window.__dt=setTimeout(()=>t.remove(),4000)}catch(e){}}
 function fire(type,el,x,y){(el||phone).dispatchEvent(new PointerEvent(type,{pointerId:VID,pointerType:'mouse',isPrimary:true,clientX:x,clientY:y,bubbles:true,cancelable:true,buttons:type==='pointerup'?0:1}))}
 /* texto: posicao dos caracteres de uma textarea. Um espelho invisivel guarda o texto e cada letra so e medida quando precisa (rapido mesmo com texto grande) */
 let ic=null;
@@ -356,7 +362,7 @@ function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);if(st.p
  else if(st.ext){const mb=menuHit(u.tx,u.ty,14);if(st.mv>=12){if(!mb){hideMenu();showMenu()}}else if(Date.now()-st.t<350&&e.type==='pointerup'){if(mb)mb.click();else{const A=sel;if(A){let b;if(A.ta)b={ta:A.ta,i:idxAt(A.ta,u.tx,u.ty)};else b=txtAt(u);if(b)selTo(A,b)}lastTap=Date.now();hideMenu();showMenu()}}}
  else if(st.txt){pressPtr(1);hideMenu();const T=st.tw,col=T.ta?T.ta.selectionStart===T.ta.selectionEnd:getSelection().isCollapsed;if(col)showPaste(u);else showMenu()}
  else if(st.drag){window.__pgDrop&&window.__pgDrop();fire('pointerup',phone,u.tx+st.off[0],u.ty+st.off[1]);pressPtr(1);hideMenu();if(st.mv<12)showPaste(u)}
- else if(st.mv<12&&Date.now()-st.t<350&&e.type==='pointerup'){const kb=st.kb,webTap=()=>{fire('pointerdown',u.el,u.x,u.y);fire('pointerup',u.el,u.x,u.y);
+ else if(st.mv<12&&Date.now()-st.t<350&&e.type==='pointerup'){const kb=st.kb,webTap=()=>{dbg(u);fire('pointerdown',u.el,u.x,u.y);fire('pointerup',u.el,u.x,u.y);
   if(u.el){u.el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:u.x,clientY:u.y}));
    const ta=u.el.closest&&u.el.closest('textarea');if(ta){focusQuiet(ta);const i=idxAt(ta,u.tx,u.ty);ta.setSelectionRange(i,i)}}
   };pressPtr(.75);setTimeout(()=>pressPtr(1),140);lastTap=kb?0:Date.now();hideMenu();if(window.__pgTap)window.__pgTap(webTap);else webTap()}
