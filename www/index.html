@@ -222,9 +222,10 @@ requestAnimationFrame(()=>{const t=dock.children[3].getBoundingClientRect(),r=ph
 /* area de toque generosa: se a ponta nao estiver em algo clicavel, procura o mais proximo ao redor (corpo da seta) */
 const HIT='.ic,button,a,textarea,.bar,.rz,.k,.cct,.sld,.drh';
 function elAt(x,y){return document.elementsFromPoint(x,y).find(e=>!e.closest('.ptr'))}
-function under(tol){const r=phone.getBoundingClientRect(),tx=r.left+px,ty=r.top+py;let el=elAt(tx,ty),x=tx,y=ty;
- if(tol&&!(el&&el.closest(HIT))){const u=r.width*.025;
-  find:for(const k of [1,2,3.2])for(const a of [45,0,90,315,135,270,180,225]){const qx=tx+Math.cos(a*Math.PI/180)*u*k,qy=ty+Math.sin(a*Math.PI/180)*u*k,e=elAt(qx,qy);if(e&&e.closest(HIT)){el=e;x=qx;y=qy;break find}}}
+function icFix(el,x,y){if(el&&el.closest(HIT))return el;for(const c of document.querySelectorAll(".ic")){const b=c.getBoundingClientRect();if(b.width&&x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom&&(!el||el.contains(c)))return c}return el}
+function under(tol){const r=phone.getBoundingClientRect(),tx=r.left+px,ty=r.top+py;let el=icFix(elAt(tx,ty),tx,ty),x=tx,y=ty;
+ if(tol&&!(el&&el.closest(HIT))){const u=r.width*.012;
+  find:for(const k of [.5,1])for(const a of [45,0,90,315,135,270,180,225]){const qx=tx+Math.cos(a*Math.PI/180)*u*k,qy=ty+Math.sin(a*Math.PI/180)*u*k,e=elAt(qx,qy);if(e&&e.closest(HIT)){el=e;x=qx;y=qy;break find}}}
  return{x,y,tx,ty,el}}
 function fire(type,el,x,y){(el||phone).dispatchEvent(new PointerEvent(type,{pointerId:VID,pointerType:'mouse',isPrimary:true,clientX:x,clientY:y,bubbles:true,cancelable:true,buttons:type==='pointerup'?0:1}))}
 /* texto: posicao dos caracteres de uma textarea. Um espelho invisivel guarda o texto e cada letra so e medida quando precisa (rapido mesmo com texto grande) */
@@ -348,7 +349,7 @@ phone.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
   else{const b=txtAt(u);if(b&&b.node===T.node)getSelection().setBaseAndExtent(T.node,Math.min(T.s,b.off),T.node,Math.max(T.f,b.off))}}
  else if(st.dbl||st.ext){const A=st.dbl?st.a:sel;if(A&&st.mv>=12){const u=under(true);let b;if(A.ta){const ta=A.ta,bb=ta.getBoundingClientRect();if(u.ty>bb.bottom-8)ta.scrollTop+=10;else if(u.ty<bb.top+8)ta.scrollTop-=10;b={ta,i:idxAt(ta,u.tx,u.ty)}}else b=txtAt(u);if(b&&!menuHit(u.tx,u.ty,8))selTo(A,b)}}
  else if(st.drag){const u=under();fire('pointermove',phone,u.tx+st.off[0],u.ty+st.off[1])}});
-function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u=under(false);
+function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u=under(true);
  if(st.dbl){
   
   if(st.mv<12&&st.a)pickWord(st.a);lastTap=0;hideMenu();if(!st.stop)showMenu()}
