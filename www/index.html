@@ -348,7 +348,7 @@ phone.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
   else{const b=txtAt(u);if(b&&b.node===T.node)getSelection().setBaseAndExtent(T.node,Math.min(T.s,b.off),T.node,Math.max(T.f,b.off))}}
  else if(st.dbl||st.ext){const A=st.dbl?st.a:sel;if(A&&st.mv>=12){const u=under(true);let b;if(A.ta){const ta=A.ta,bb=ta.getBoundingClientRect();if(u.ty>bb.bottom-8)ta.scrollTop+=10;else if(u.ty<bb.top+8)ta.scrollTop-=10;b={ta,i:idxAt(ta,u.tx,u.ty)}}else b=txtAt(u);if(b&&!menuHit(u.tx,u.ty,8))selTo(A,b)}}
  else if(st.drag){const u=under();fire('pointermove',phone,u.tx+st.off[0],u.ty+st.off[1])}});
-function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u=under(true);
+function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u=under(false);
  if(st.dbl){
   
   if(st.mv<12&&st.a)pickWord(st.a);lastTap=0;hideMenu();if(!st.stop)showMenu()}
