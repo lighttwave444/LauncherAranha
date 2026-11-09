@@ -483,31 +483,43 @@ public class VirtualWindow {
         }
     }
 
-    // ===== ponteiro agarra a janela (barra ou setinha) =====
+    // ===== ponteiro agarra a janela (barra, setinha ou canto de redimensionar) =====
     private static long PG_SEQ = 0;
     private final long pgZ = ++PG_SEQ;
     private static VirtualWindow pgWin;
-    private static int pgDx, pgDy;
+    private static boolean pgResize = false;
+    private static int pgDx, pgDy, pgSx, pgSy, pgW0, pgH0;
     private static volatile int pgX, pgY;
     private static volatile boolean pgPending = false;
 
     public static boolean grabAt(int x, int y) {
         VirtualWindow best = null;
+        boolean bestGrip = false;
         synchronized (WINDOWS) {
             for (VirtualWindow v : WINDOWS.values()) {
                 if (v.wlp == null) continue;
-                int l = v.wlp.x, t = v.wlp.y, r = l + v.wlp.width;
+                int l = v.wlp.x, t = v.wlp.y;
+                int r = l + v.wlp.width, b = t + v.wlp.height;
+                int g = v.dp(44);
+                boolean inGrip = x >= r - g && x <= r && y >= b - g && y <= b;
                 boolean inBar = x >= l && x <= r && y >= t && y <= t + v.barH;
                 int aw = v.dp(22), ah = v.dp(60);
                 int ay = t + v.wlp.height / 2 - ah / 2;
                 boolean inArrow = x >= l && x <= l + aw && y >= ay && y <= ay + ah;
-                if ((inBar || inArrow) && (best == null || v.pgZ > best.pgZ)) best = v;
+                if ((inGrip || inBar || inArrow) && (best == null || v.pgZ > best.pgZ)) {
+                    best = v;
+                    bestGrip = inGrip;
+                }
             }
         }
         if (best == null) return false;
         pgWin = best;
+        pgResize = bestGrip;
         pgDx = x - best.wlp.x;
         pgDy = y - best.wlp.y;
+        pgSx = x; pgSy = y;
+        pgW0 = best.wlp.width;
+        pgH0 = best.wlp.height;
         return true;
     }
 
@@ -519,11 +531,24 @@ public class VirtualWindow {
             pgPending = false;
             VirtualWindow v = pgWin;
             if (v == null) return;
-            v.wlp.x = pgX - pgDx;
-            v.wlp.y = Math.max(0, pgY - pgDy);
+            if (pgResize) {
+                v.wlp.width = Math.max(v.dp(200), pgW0 + (pgX - pgSx));
+                v.wlp.height = Math.max(v.dp(200) + v.barH, pgH0 + (pgY - pgSy));
+            } else {
+                v.wlp.x = pgX - pgDx;
+                v.wlp.y = Math.max(0, pgY - pgDy);
+            }
             v.update();
         }});
     }
 
-    public static void drop() { pgWin = null; }
+    public static void drop() {
+        final VirtualWindow v = pgWin;
+        final boolean rs = pgResize;
+        pgWin = null;
+        pgResize = false;
+        if (v != null && rs) {
+            MAIN.post(new Runnable() { public void run() { v.applySize(); } });
+        }
+    }
 }
