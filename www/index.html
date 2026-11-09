@@ -332,7 +332,7 @@ let lastTap=0,sel=null;const selOk=()=>sel&&((sel.ta&&sel.ta.isConnected)||(sel.
 phone.addEventListener('pointerdown',e=>{
  if(!e.isTrusted||e.pointerType==='mouse'||st||!isBg(e.target))return;
  e.preventDefault();phone.setPointerCapture(e.pointerId);const onKb=kbPtr&&!!e.target.closest('.kb');
- st={id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:Date.now(),mv:0,off:[0,0],drag:false,kb:onKb,top:(e.clientY-phone.getBoundingClientRect().top)<Math.max(26,phone.getBoundingClientRect().width*.07),dbl:!onKb&&Date.now()-lastTap<450,a:null};
+ st={p0:[px,py],id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:Date.now(),mv:0,off:[0,0],drag:false,kb:onKb,top:(e.clientY-phone.getBoundingClientRect().top)<Math.max(26,phone.getBoundingClientRect().width*.07),dbl:!onKb&&Date.now()-lastTap<450,a:null};
  if(st.dbl&&selOk()){sel=null;st.stop=true}
  else if(st.dbl){st.a=txtAt(under(true));sel=st.a;if(st.a&&st.a.ta){focusQuiet(st.a.ta);st.a.ta.setSelectionRange(st.a.i,st.a.i)}}
  else if(!st.ext)st.h=setTimeout(()=>{if(st&&!st.drag&&!st.txt&&st.mv<12){const u=under(true),a=textHit(u)?txtAt(u):null;
@@ -349,7 +349,7 @@ phone.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
   else{const b=txtAt(u);if(b&&b.node===T.node)getSelection().setBaseAndExtent(T.node,Math.min(T.s,b.off),T.node,Math.max(T.f,b.off))}}
  else if(st.dbl||st.ext){const A=st.dbl?st.a:sel;if(A&&st.mv>=12){const u=under(true);let b;if(A.ta){const ta=A.ta,bb=ta.getBoundingClientRect();if(u.ty>bb.bottom-8)ta.scrollTop+=10;else if(u.ty<bb.top+8)ta.scrollTop-=10;b={ta,i:idxAt(ta,u.tx,u.ty)}}else b=txtAt(u);if(b&&!menuHit(u.tx,u.ty,8))selTo(A,b)}}
  else if(st.drag){const u=under();fire('pointermove',phone,u.tx+st.off[0],u.ty+st.off[1])}});
-function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);const u=under(true);
+function endPad(e){if(!st||e.pointerId!==st.id)return;clearTimeout(st.h);if(st.p0&&!st.drag&&!st.txt&&!st.dbl&&!st.ext&&st.mv<12){px=st.p0[0];py=st.p0[1];drawPtr()}const u=under(true);
  if(st.dbl){
   
   if(st.mv<12&&st.a)pickWord(st.a);lastTap=0;hideMenu();if(!st.stop)showMenu()}
