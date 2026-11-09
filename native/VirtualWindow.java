@@ -342,7 +342,7 @@ public class VirtualWindow {
             public void run() {
                 try {
                     ensureHelper(ctx);
-                    String out = RootShell.run("am start --display " + displayId + " --windowingMode 1 " + amArgs + " 2>&1");
+                    String out = RootShell.run((pkg != null && !pkg.isEmpty() ? "am force-stop " + pkg + "; " : "") + "am start --display " + displayId + " --windowingMode 1 " + amArgs + " 2>&1");
                     log("am start: " + out);
                     if (out != null && (out.contains("Error") || out.contains("Exception"))) {
                         fail("am start recusou");
